@@ -1,10 +1,8 @@
 package com.xinghuo.demo;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.HttpHostConnectException;
@@ -18,7 +16,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +23,9 @@ import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Component
 public class IPUtil  implements CommandLineRunner {
@@ -104,7 +103,7 @@ public class IPUtil  implements CommandLineRunner {
             log.info("近期使用的IP数量[{}]",map.size());
         }
         if(map.size() > 20){
-            log.info("判断是否服务器故障：近20次不同IP是在近30分钟内产生的。");
+            log.info("判断是否服务器故障：近20次不同IP是在近50分钟内产生的。");
 
             boolean flag = true;
             Date currentDate = new Date();
@@ -112,23 +111,23 @@ public class IPUtil  implements CommandLineRunner {
                 String key = map1.getKey();
                 Date value = map1.getValue();
                 log.info("IP[{}]获取时间[{}]",key,sdf.format(value));
-                if((currentDate.getTime() - value.getTime()) > 30*60*1000 ){
-                    // 只要 有一个 IP 是 30分钟之外产生的 就 认为 服务器正常
+                if((currentDate.getTime() - value.getTime()) > 50*60*1000 ){
+                    // 只要 有一个 IP 是 50分钟之外产生的 就 认为 服务器正常
                     flag = false;
                     break;
                 }
             }
             if(flag){
-                log.info("近20次不同IP是在近30分钟内产生的，重启服务器");
+                log.info("近20次不同IP是在近50分钟内产生的，重启服务器");
                 execShell("  reboot ");
             }else {
-                log.info("近20次不同IP不是在近30分钟内产生的，清除计数。");
+                log.info("近20次不同IP不是在近50分钟内产生的，清除计数。");
                 map.clear();
             }
         }
-
-        log.info("比较当前IP[{}]和发送给服务器的IP[{}]是否一致",currentHost,host);
-        if(!currentHost.equalsIgnoreCase(host)){
+        boolean b = currentHost.equalsIgnoreCase(host);
+        log.info("比较当前IP[{}]和发送给服务器的IP[{}]是否一致，结果[{}]",currentHost,host,b);
+        if(!b){
             if(vilidIP(currentHost)){
                 log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
                 sendGet("http://"+server+":1819/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
