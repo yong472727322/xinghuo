@@ -48,6 +48,11 @@ public class IPUtil  implements CommandLineRunner {
     private int port;
     @Value("${vps.ip}")
     private String vps;
+    /**
+     * 是否验证 连接服务器
+     */
+    @Value("${vilid.server}")
+    private boolean vilidServer;
 
     /**
      * 执行sh脚本
@@ -194,6 +199,10 @@ public class IPUtil  implements CommandLineRunner {
         }
         log.info("检测IP[{}]是否可用",ip);
         boolean b = checkIP(ip,"www.amazon.com");
+        if(!vilidServer && b){
+            log.warn("IP[{}]只验证了[www.amazon.com]。",ip);
+            return true;
+        }
         boolean b2 = checkIP(ip,server);
         if(b && b2){
             log.warn("IP[{}]可用。",ip);
