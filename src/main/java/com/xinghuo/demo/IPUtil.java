@@ -167,9 +167,18 @@ public class IPUtil  implements CommandLineRunner {
                 log.warn("IP[{}]验证失败，等待30秒，再次进行验证。",currentHost);
                 Thread.sleep(30000);
                 vilidIP = vilidIP(currentHost);
-                log.warn("IP[{}]再次验证失败，等待30秒，最后进行一次验证。",currentHost);
-                Thread.sleep(30000);
-                vilidIP = vilidIP(currentHost);
+                if(!vilidIP){
+                    log.warn("IP[{}]再次验证失败，等待30秒，最后进行一次验证。",currentHost);
+                    Thread.sleep(30000);
+                    vilidIP = vilidIP(currentHost);
+                    if(!vilidIP){
+                        log.warn("IP[{}]连续3次验证失败，使用[stop-network.sh]脚本。",currentHost);
+                        currentHost = execShell("  /root/stop-network.sh ");
+                        Thread.sleep(5000);
+                        log.info("使用[stop-network.sh]脚本 get ip success , the new ip is [{}]",currentHost);
+                        vilidIP = vilidIP(currentHost);
+                    }
+                }
             }
             if(vilidIP){
                 sendHost(currentHost);
