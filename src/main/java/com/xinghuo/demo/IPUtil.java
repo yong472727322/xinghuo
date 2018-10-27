@@ -155,8 +155,17 @@ public class IPUtil  implements CommandLineRunner {
         try{
             log.info(" start change ip , the old ip is [{}]",host);
             currentHost = execShell("  /root/get-ip.sh ");
+
             log.info("get ip success , the new ip is [{}]",currentHost);
             boolean vilidIP = vilidIP(currentHost);
+            if(!vilidIP){
+                log.warn("IP[{}]验证失败，等待30秒，再次进行验证。",currentHost);
+                Thread.sleep(30000);
+                vilidIP = vilidIP(currentHost);
+                log.warn("IP[{}]再次验证失败，等待30秒，最后进行一次验证。",currentHost);
+                Thread.sleep(30000);
+                vilidIP = vilidIP(currentHost);
+            }
             if(vilidIP){
                 sendHost(currentHost);
                 if(0 == failCount){
@@ -203,9 +212,10 @@ public class IPUtil  implements CommandLineRunner {
             String persentStr = split[0];
             int persent = Integer.parseInt(persentStr);
             if(persent <= 30){
-                log.warn("IP[{}]丢包率小于30%，可用",ip);
+                log.warn("IP[{}]丢包率[{}]小于30%，可用",ip,persent);
                 return true;
             }
+            log.warn("IP[{}]的丢包率为[{}]",ip,persent);
         }
         return false;
     }
