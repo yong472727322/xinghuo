@@ -136,10 +136,13 @@ public class IPUtil  implements CommandLineRunner {
         log.info("比较当前IP[{}]和发送给服务器的IP[{}]是否一致，结果[{}]",currentHost,host,b);
         if(!b){
             if(vilidIP(currentHost)){
-                log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
-                sendGet("http://"+server+":"+port+"/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
-                if(0 == failCount){
-                    host = currentHost;
+                b = currentHost.equalsIgnoreCase(host);
+                if(!b){
+                    log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
+                    sendGet("http://"+server+":"+port+"/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
+                    if(0 == failCount){
+                        host = currentHost;
+                    }
                 }
             }else {
                 log.warn("IP[{}]验证失败，等待5秒，重新拨号",currentHost);
