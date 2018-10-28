@@ -136,12 +136,6 @@ public class IPUtil  implements CommandLineRunner {
         log.info("比较当前IP[{}]和发送给服务器的IP[{}]是否一致，结果[{}]",currentHost,host,b);
         if(!b){
             if(vilidIP(currentHost)){
-<<<<<<< HEAD
-                log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
-                sendGet("http://"+server+":51819/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
-                if(0 == failCount){
-                    host = currentHost;
-=======
                 b = currentHost.equalsIgnoreCase(host);
                 if(!b){
                     log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
@@ -149,7 +143,6 @@ public class IPUtil  implements CommandLineRunner {
                     if(0 == failCount){
                         host = currentHost;
                     }
->>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
                 }
             }else {
                 log.warn("IP[{}]验证失败，等待5秒，重新拨号",currentHost);
@@ -295,11 +288,7 @@ public class IPUtil  implements CommandLineRunner {
 
     private void sendHost(String newIp) {
         log.info("send new ip [{}] to server",newIp);
-<<<<<<< HEAD
-        sendGet("http://"+server+":51819/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
-=======
         sendGet("http://"+server+":"+port+"/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
->>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
     }
 
     private boolean flag = false;
@@ -320,11 +309,7 @@ public class IPUtil  implements CommandLineRunner {
     }
 
     public void sendVpsState(boolean state){
-<<<<<<< HEAD
-        String url = "http://"+server+":51819/amazon/recordVpsState?vps="+vps+"&state=" + state;
-=======
         String url = "http://"+server+":"+port+"/amazon/recordVpsState?vps="+vps+"&state=" + state;
->>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
         sendGet(url);
     }
 }
