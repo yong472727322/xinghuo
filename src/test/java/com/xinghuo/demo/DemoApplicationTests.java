@@ -1,11 +1,11 @@
-package com.xinghuo.demo;
-
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
-public class DemoApplicationTests {
-
-//    @Test
-    public void contextLoads() {
-    }
-
-}
+//package com.xinghuo.demo;
+//
+////@RunWith(SpringRunner.class)
+////@SpringBootTest
+//public class DemoApplicationTests {
+//
+////    @Test
+//    public void contextLoads() {
+//    }
+//
+//}

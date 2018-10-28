@@ -44,8 +44,15 @@ public class IPUtil  implements CommandLineRunner {
 
     @Value("${server.ip}")
     private String server;
+    @Value("${vps.server.port}")
+    private int port;
     @Value("${vps.ip}")
     private String vps;
+    /**
+     * 是否验证 连接服务器
+     */
+    @Value("${vilid.server}")
+    private boolean vilidServer;
 
     /**
      * 执行sh脚本
@@ -129,10 +136,20 @@ public class IPUtil  implements CommandLineRunner {
         log.info("比较当前IP[{}]和发送给服务器的IP[{}]是否一致，结果[{}]",currentHost,host,b);
         if(!b){
             if(vilidIP(currentHost)){
+<<<<<<< HEAD
                 log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
                 sendGet("http://"+server+":51819/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
                 if(0 == failCount){
                     host = currentHost;
+=======
+                b = currentHost.equalsIgnoreCase(host);
+                if(!b){
+                    log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
+                    sendGet("http://"+server+":"+port+"/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
+                    if(0 == failCount){
+                        host = currentHost;
+                    }
+>>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
                 }
             }else {
                 log.warn("IP[{}]验证失败，等待5秒，重新拨号",currentHost);
@@ -153,8 +170,26 @@ public class IPUtil  implements CommandLineRunner {
         try{
             log.info(" start change ip , the old ip is [{}]",host);
             currentHost = execShell("  /root/get-ip.sh ");
+
             log.info("get ip success , the new ip is [{}]",currentHost);
             boolean vilidIP = vilidIP(currentHost);
+            if(!vilidIP){
+                log.warn("IP[{}]验证失败，等待30秒，再次进行验证。",currentHost);
+                Thread.sleep(30000);
+                vilidIP = vilidIP(currentHost);
+                if(!vilidIP){
+                    log.warn("IP[{}]再次验证失败，等待30秒，最后进行一次验证。",currentHost);
+                    Thread.sleep(30000);
+                    vilidIP = vilidIP(currentHost);
+                    if(!vilidIP){
+                        log.warn("IP[{}]连续3次验证失败，使用[stop-network.sh]脚本。",currentHost);
+                        currentHost = execShell("  /root/stop-network.sh ");
+                        Thread.sleep(5000);
+                        log.info("使用[stop-network.sh]脚本 get ip success , the new ip is [{}]",currentHost);
+                        vilidIP = vilidIP(currentHost);
+                    }
+                }
+            }
             if(vilidIP){
                 sendHost(currentHost);
                 if(0 == failCount){
@@ -183,6 +218,10 @@ public class IPUtil  implements CommandLineRunner {
         }
         log.info("检测IP[{}]是否可用",ip);
         boolean b = checkIP(ip,"www.amazon.com");
+        if(!vilidServer && b){
+            log.warn("IP[{}]只验证了[www.amazon.com]。",ip);
+            return true;
+        }
         boolean b2 = checkIP(ip,server);
         if(b && b2){
             log.warn("IP[{}]可用。",ip);
@@ -201,9 +240,10 @@ public class IPUtil  implements CommandLineRunner {
             String persentStr = split[0];
             int persent = Integer.parseInt(persentStr);
             if(persent <= 30){
-                log.warn("IP[{}]丢包率小于30%，可用",ip);
+                log.warn("IP[{}]丢包率[{}]小于30%，可用",ip,persent);
                 return true;
             }
+            log.warn("IP[{}]的丢包率为[{}]",ip,persent);
         }
         return false;
     }
@@ -255,7 +295,11 @@ public class IPUtil  implements CommandLineRunner {
 
     private void sendHost(String newIp) {
         log.info("send new ip [{}] to server",newIp);
+<<<<<<< HEAD
         sendGet("http://"+server+":51819/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
+=======
+        sendGet("http://"+server+":"+port+"/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
+>>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
     }
 
     private boolean flag = false;
@@ -276,7 +320,11 @@ public class IPUtil  implements CommandLineRunner {
     }
 
     public void sendVpsState(boolean state){
+<<<<<<< HEAD
         String url = "http://"+server+":51819/amazon/recordVpsState?vps="+vps+"&state=" + state;
+=======
+        String url = "http://"+server+":"+port+"/amazon/recordVpsState?vps="+vps+"&state=" + state;
+>>>>>>> 2f21f461d76daa996dafd5be082420b1cc6a43d0
         sendGet(url);
     }
 }
