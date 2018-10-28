@@ -130,7 +130,7 @@ public class IPUtil  implements CommandLineRunner {
         if(!b){
             if(vilidIP(currentHost)){
                 log.info("当前IP[{}]和发送给服务器的IP[{}]不一致，发送给服务器。",currentHost,host);
-                sendGet("http://"+server+":1819/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
+                sendGet("http://"+server+":51819/amazon/recordIP?ip=" + currentHost + "&vps="+vps);
                 if(0 == failCount){
                     host = currentHost;
                 }
@@ -255,7 +255,7 @@ public class IPUtil  implements CommandLineRunner {
 
     private void sendHost(String newIp) {
         log.info("send new ip [{}] to server",newIp);
-        sendGet("http://"+server+":1819/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
+        sendGet("http://"+server+":51819/amazon/saveIP?port=4431&password=password&account="+vps+"&ip=" + newIp+"&vps="+vps);
     }
 
     private boolean flag = false;
@@ -276,7 +276,7 @@ public class IPUtil  implements CommandLineRunner {
     }
 
     public void sendVpsState(boolean state){
-        String url = "http://"+server+":1819/amazon/recordVpsState?vps="+vps+"&state=" + state;
+        String url = "http://"+server+":51819/amazon/recordVpsState?vps="+vps+"&state=" + state;
         sendGet(url);
     }
 }
