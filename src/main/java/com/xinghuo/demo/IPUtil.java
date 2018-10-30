@@ -245,23 +245,29 @@ public class IPUtil  implements CommandLineRunner {
      * 失败次数
      */
     private int failCount = 0;
+
+    int statusCode = 0;
+    String resultStr = null;
     /**
      * 发送GET请求
      * @param url
      */
     private void sendGet(String url){
+
         try {
             HttpGet httpGet = new HttpGet(url);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();//设置请求和传输超时时间
             httpGet.setConfig(requestConfig);
             HttpResponse execute = httpCilent.execute(httpGet);
             StatusLine statusLine = execute.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
-            String resultStr = EntityUtils.toString(execute.getEntity());
+            statusCode = statusLine.getStatusCode();
+            resultStr = EntityUtils.toString(execute.getEntity());
             log.info("请求[{}]的响应码是[{}]，返回的结果是[{}]",url,statusCode,resultStr);
-            if(200 == statusCode){
+            if(200 == statusCode && "true".equalsIgnoreCase(resultStr)){
                 //请求成功，失败次数重置为0
                 failCount = 0;
+            }else {
+                failCount ++;
             }
         } catch (ConnectTimeoutException e) {
             failCount ++;
