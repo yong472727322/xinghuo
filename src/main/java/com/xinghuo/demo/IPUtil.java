@@ -1,5 +1,6 @@
 package com.xinghuo.demo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -306,6 +307,10 @@ public class IPUtil  implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
+        if(StringUtils.isEmpty(vps)){
+            log.error("VPS[{}]为空，请配置[vps.ip]的值，系统退出。",vps);
+            System.exit(-1);
+        }
         log.info("VPS[{}]启动中。。。",vps);
         sendVpsState(true);
         flag = true;
