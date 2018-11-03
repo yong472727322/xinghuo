@@ -149,12 +149,10 @@ public class IPUtil  implements CommandLineRunner {
                 log.warn("IP[{}]验证失败，等待5秒，重新拨号",currentHost);
                 try {
                     Thread.sleep(5000);
+                    execShell("  /root/get-ip.sh ");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                execShell(" /root/get-ip.sh ");
-                testFlag = false;
-                testVPN();
             }
         }
         testFlag = false;
