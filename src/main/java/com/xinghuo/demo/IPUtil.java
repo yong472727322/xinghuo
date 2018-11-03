@@ -56,6 +56,11 @@ public class IPUtil  implements CommandLineRunner {
     private boolean vilidServer;
 
     /**
+     * 是否正在发送IP到服务器
+     */
+    private boolean isSending = false;
+
+    /**
      * 执行sh脚本
      * @param exec
      * @return
@@ -160,6 +165,10 @@ public class IPUtil  implements CommandLineRunner {
 
     public void getNewHost() {
         try{
+            if(isSending){
+                log.warn("正在发送IP到服务器。。。");
+                return;
+            }
             log.info(" start change ip , the old ip is [{}]",host);
             currentHost = execShell("  /root/get-ip.sh ");
 
@@ -254,8 +263,9 @@ public class IPUtil  implements CommandLineRunner {
     private void sendGet(String url){
 
         try {
+            isSending = true;
             HttpGet httpGet = new HttpGet(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();//设置请求和传输超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();//设置请求和传输超时时间
             httpGet.setConfig(requestConfig);
             HttpResponse execute = httpCilent.execute(httpGet);
             StatusLine statusLine = execute.getStatusLine();
@@ -265,6 +275,10 @@ public class IPUtil  implements CommandLineRunner {
             if(200 == statusCode && "true".equalsIgnoreCase(resultStr)){
                 //请求成功，失败次数重置为0
                 failCount = 0;
+            }else if(200 == statusCode && "false".equalsIgnoreCase(resultStr)) {
+                log.warn("响应码200，但是结果是[false]，说明保存失败或IP重复，重新拨号");
+                failCount ++;
+                execShell("  /root/get-ip.sh ");
             }else {
                 failCount ++;
             }
@@ -286,8 +300,9 @@ public class IPUtil  implements CommandLineRunner {
                 //失败超过10次，可能是VPS的问题
                 log.warn("失败超过10次，可能是VPS的问题，重新切换IP");
                 failCount = 0;
-                getNewHost();
+                execShell("  /root/get-ip.sh ");
             }
+            isSending = false;
         }
     }
 
