@@ -25,6 +25,7 @@ import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -100,7 +101,7 @@ public class IPUtil  implements CommandLineRunner {
      * 每分钟发送VPS当前IP到服务器
      */
     @Scheduled(cron = "0 0/1 * * * ?")
-    public void testVPN() throws ParseException {
+    public void testVPN() {
         if(flag){
             log.warn("正在启动。。。");
             return;
@@ -162,6 +163,31 @@ public class IPUtil  implements CommandLineRunner {
         }
         testFlag = false;
     }
+
+    //20分钟
+    private int thirtyMin = 20 * 60 * 1000;
+    /**
+     * 每20分钟获取当前IP，判断有没有不同，没有就主动换。
+     */
+    @Scheduled(cron = "50 0/20 * * * ?")
+    public void checkServerVpsIp(){
+
+        Date nowDate = new Date();
+
+        log.info("每20分钟获取当前IP，判断有没有不同，没有就主动换。");
+        if(testFlag || flag){
+            log.warn("VPS正在启动或正在检测IP");
+            return;
+        }
+
+        Date date = (Date) ips.get("date");
+
+        if((nowDate.getTime() - date.getTime()) > thirtyMin){
+            host = "每20分钟获取当前IP，判断有没有不同，没有就主动换。";
+        }
+
+    }
+
 
     public void getNewHost() {
         try{
@@ -256,6 +282,8 @@ public class IPUtil  implements CommandLineRunner {
 
     int statusCode = 0;
     String resultStr = null;
+
+    private Map<String,Object> ips = new HashMap<>(3);
     /**
      * 发送GET请求
      * @param url
@@ -273,6 +301,8 @@ public class IPUtil  implements CommandLineRunner {
             resultStr = EntityUtils.toString(execute.getEntity());
             log.info("请求[{}]的响应码是[{}]，返回的结果是[{}]",url,statusCode,resultStr);
             if(200 == statusCode && "true".equalsIgnoreCase(resultStr)){
+                ips.put("host",host);
+                ips.put("date",new Date());
                 //请求成功，失败次数重置为0
                 failCount = 0;
             }else if(200 == statusCode && "false".equalsIgnoreCase(resultStr)) {
